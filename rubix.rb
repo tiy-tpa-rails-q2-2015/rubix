@@ -14,6 +14,7 @@ ice_cream = [
 ]
 
 template = ERB.new(File.read('index.html.erb'))
-puts template.result
 
-
+File.open('index.html', 'w') do |file|
+  file.write template.result
+end
