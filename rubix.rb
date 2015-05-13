@@ -1,20 +1,26 @@
 require 'erb'
+require 'webrick'
 
-page_title = "Hello, ERB."
+ROOT = File.dirname(__FILE__)
 
-ice_cream = [
-  "Rocky Road",
-  "Vanilla",
-  "Mint Chocolate Chip",
-  "Moose Tracks",
-  "American Dream",
-  "Cherry Garcia",
-  "Reese's Pieces",
-  "Neapolitan"
-]
+server = WEBrick::HTTPServer.new(:Port => 8000, :DocumentRoot => "#{ROOT}/public")
 
-template = ERB.new(File.read('index.html.erb'))
-
-File.open('index.html', 'w') do |file|
-  file.write template.result
+server.mount_proc '/ice_cream' do |req, res|
+  @page_title = "Hello, Ice Cream."
+  @ice_cream = File.read("#{ROOT}/ice_cream.txt").split("\n")
+  template = ERB.new(File.read("#{ROOT}/index.html.erb"))
+  res.body = template.result
 end
+
+server.mount_proc '/movies' do |req, res|
+  @page_title = "Movies."
+  @ice_cream = File.read("#{ROOT}/movies.txt").split("\n")
+  template = ERB.new(File.read("#{ROOT}/index.html.erb"))
+  res.body = template.result
+end
+
+trap 'INT' do
+  server.shutdown
+end
+
+server.start
